@@ -1,87 +1,108 @@
 
-
-//===================================================================================//
+//============================================================================================//
+/*
+  Filename: Read-Touch-Interrupt.ino
+  Description: Example Arduino sketch from the CSE_CST328 Arduino library.
+  Reads the touch sensor through interrupt method and prints the data to the serial monitor.
+  This code was written for and tested with FireBeetle-ESP32E board.
+  
+  Framework: Arduino, PlatformIO
+  Author: Vishnu Mohanan (@vishnumaiea, @vizmohanan)
+  Maintainer: CIRCUITSTATE Electronics (@circuitstate)
+  Version: 0.1
+  License: MIT
+  Source: https://github.com/CIRCUITSTATE/CSE_CST328
+  Last Modified: +05:30 00:12:15 AM 27-03-2025, Thursday
+ */
+//============================================================================================//
 
 #include <Wire.h>
 #include <CSE_FT6206.h>
 
-#define FT6206_PIN_RST  2
-#define FT6206_PIN_INT  4
-#define FT6206_PIN_SDA  12
-#define FT6206_PIN_SCL  13
+#define FT6206_PIN_RST  4
+#define FT6206_PIN_INT  25
+#define FT6206_PIN_SDA  21
+#define FT6206_PIN_SCL  22
 
-//===================================================================================//
+//============================================================================================//
 
-// Create a new instance of the FT6206 class and send the Wire instance,
-// and the reset pin to the constructor.
-// You can leave all of these parameters if you want to use the default values.
-// The default values are: Wire, -1.
-CSE_FT6206 tsPanel = CSE_FT6206 (&Wire, FT6206_PIN_RST);
+// Parameters: Width, Height, &Wire, Reset pin, Interrupt pin
+CSE_FT6206 tsPanel = CSE_FT6206 (240, 320, &Wire, FT6206_PIN_RST, FT6206_PIN_INT);
 
 bool intReceived = false; // Flag to indicate that an interrupt has been received
 
-//===================================================================================//
+//============================================================================================//
 
 void setup() {
   Serial.begin (115200);
-  delay (2000);
-  Serial.println ("FT6206 Touch Controller Test");
+  delay (100);
 
-  // // Set the I2C pins if your board allows it
-  // Wire.setSDA (FT6206_PIN_SDA);
-  // Wire.setSCL (FT6206_PIN_SCL);
+  Serial.println();
+  Serial.println ("== CSE_FT6206: Read-Touch-Interrupt ==");
+
+  // // Initialize the I2C interface (for ESP32).
+  // Wire.begin (FT6206_PIN_SDA, FT6206_PIN_SCL);
+
   Wire.begin();
 
   tsPanel.begin();
   tsPanel.setActiveScanRate (60);
   tsPanel.setMonitorScanRate (60);
 
-  // Change the interrupt mode to trigger or polling and observe the difference
+  // Change the interrupt mode to trigger or polling and observe the difference.
   tsPanel.setInterruptMode (FT62XX_INTERRUPT_TRIGGER);
   // tsPanel.setInterruptMode (FT62XX_INTERRUPT_POLLING);
 
   // Either use internal pullup or external pullup. Line is active low.
   pinMode (FT6206_PIN_INT, INPUT_PULLUP);
 
-  attachInterrupt (digitalPinToInterrupt (FT6206_PIN_INT), readTouch, FALLING);
+  // Attach the interrupt function.
+  attachInterrupt (digitalPinToInterrupt (FT6206_PIN_INT), touchISR, FALLING);
   delay (1000);
+
 }
 
-//===================================================================================//
+//============================================================================================//
 
 void loop() {
   if (intReceived) {
-    tsPanel.readData();
-
-    for (uint8_t i = 0; i < tsPanel.touches; i++) {
-      Serial.println();
-      Serial.print ("ID #");
-      Serial.print (tsPanel.touchID [i]);
-      Serial.print ("\t(");
-      Serial.print (tsPanel.touchX [i]);
-      Serial.print (", ");
-      Serial.print (tsPanel.touchY [i]);
-      Serial.print (", ");
-      Serial.print (tsPanel.touchWeight [i]);
-      Serial.print (", ");
-      Serial.print (tsPanel.touchArea [i]);
-      Serial.print (", ");
-      Serial.print (tsPanel.touchEvent [i]);
-      Serial.print (") ");
-    }
-    Serial.println();
-    // delay (50);  // Set a delay here if you want to wait for some time before reading again.
+    readTouch();
     intReceived = false;
-    attachInterrupt (digitalPinToInterrupt (FT6206_PIN_INT), readTouch, FALLING);
+    attachInterrupt (digitalPinToInterrupt (FT6206_PIN_INT), touchISR, FALLING);
   }
 }
 
-//===================================================================================//
-
+//============================================================================================//
+/**
+ * @brief Reads a single touch point from the panel and print their info to the serial monitor.
+ * 
+ */
 void readTouch() {
+  uint8_t point = 0;
+  
+  if (tsPanel.isTouched (point)) {
+    Serial.print ("Touch ID: ");
+    Serial.print (point);
+    Serial.print (", X: ");
+    Serial.print (tsPanel.getPoint (point).x);
+    Serial.print (", Y: ");
+    Serial.print (tsPanel.getPoint (point).y);
+    Serial.print (", Z: ");
+    Serial.print (tsPanel.getPoint (point).z);
+    Serial.print (", State: ");
+    Serial.println (tsPanel.getPoint (point).state);
+  }
+  else {
+    Serial.println ("No touches detected");
+  }
+}
+
+//============================================================================================//
+
+void touchISR() {
   // Detach the interrupt to prevent multiple interrupts
   detachInterrupt (digitalPinToInterrupt (FT6206_PIN_INT));
   intReceived = true;
 }
 
-//===================================================================================//
+//============================================================================================//

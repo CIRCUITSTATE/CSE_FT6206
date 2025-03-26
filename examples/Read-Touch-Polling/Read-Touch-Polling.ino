@@ -1,75 +1,89 @@
 
-
-//===================================================================================//
+//============================================================================================//
+/*
+  Filename: Read-Touch-Polling.ino
+  Description: Example Arduino sketch from the CSE_FT6206 Arduino library.
+  Reads the touch sensor through polling method and prints the data to the serial monitor.
+  This code was written for and tested with FireBeetle-ESP32E board.
+  
+  Framework: Arduino, PlatformIO
+  Author: Vishnu Mohanan (@vishnumaiea, @vizmohanan)
+  Maintainer: CIRCUITSTATE Electronics (@circuitstate)
+  Version: 0.1
+  License: MIT
+  Source: https://github.com/CIRCUITSTATE/CSE_FT6206
+  Last Modified: +05:30 00:12:20 AM 27-03-2025, Thursday
+ */
+//============================================================================================//
 
 #include <Wire.h>
 #include <CSE_FT6206.h>
 
-#define FT6206_PIN_RST  2
+#define FT6206_PIN_RST  4
 #define FT6206_PIN_INT  -1
-#define FT6206_PIN_SDA  12
-#define FT6206_PIN_SCL  13
+#define FT6206_PIN_SDA  21
+#define FT6206_PIN_SCL  22
 
-//===================================================================================//
+//============================================================================================//
 
-// Create a new instance of the FT6206 class and send the Wire instance,
-// and the reset pin to the constructor.
-// You can leave all of these parameters if you want to use the default values.
-// The default values are: Wire, -1.
-CSE_FT6206 tsPanel = CSE_FT6206 (&Wire, FT6206_PIN_RST);
+// Parameters: Width, Height, &Wire, Reset pin, Interrupt pin
+CSE_FT6206 tsPanel = CSE_FT6206 (240, 320, &Wire, FT6206_PIN_RST, FT6206_PIN_INT);
 
-//===================================================================================//
+//============================================================================================//
 
 void setup() {
   Serial.begin (115200);
-  delay (2000);
-  Serial.println ("FT6206 Touch Controller Test");
+  delay (100);
 
-  // // Set the I2C pins if your board allows it
-  // Wire.setSDA (FT6206_PIN_SDA);
-  // Wire.setSCL (FT6206_PIN_SCL);
+  Serial.println();
+  Serial.println ("== CSE_FT6206: Read-Touch-Polling ==");
+
+  // // Initialize the I2C interface (for ESP32).
+  // Wire.begin (FT6206_PIN_SDA, FT6206_PIN_SCL);
+
   Wire.begin();
 
   tsPanel.begin();
   tsPanel.setActiveScanRate (60);
   tsPanel.setMonitorScanRate (60);
-  delay (1000);
+  
+  delay (100);
 }
 
-//===================================================================================//
+//============================================================================================//
 
 void loop() {
   readTouch();
-  delay (300);
+  delay (100);
 }
 
-//===================================================================================//
-
+//============================================================================================//
+/**
+ * @brief Reads the touches from the panel and print their info to the serial monitor.
+ * 
+ */
 void readTouch() {
-  // Wait for a touch
-  if (!tsPanel.getTouches()) {
-    return;
-  }
+  uint8_t touches = tsPanel.getTouches(); // Get the number of touches currently detected.
 
-  tsPanel.readData();
-
-  for (uint8_t i = 0; i < tsPanel.touches; i++) {
-    Serial.println();
-    Serial.print ("ID #");
-    Serial.print (tsPanel.touchID [i]);
-    Serial.print ("\t(");
-    Serial.print (tsPanel.touchX [i]);
-    Serial.print (", ");
-    Serial.print (tsPanel.touchY [i]);
-    Serial.print (", ");
-    Serial.print (tsPanel.touchWeight [i]);
-    Serial.print (", ");
-    Serial.print (tsPanel.touchArea [i]);
-    Serial.print (", ");
-    Serial.print (tsPanel.touchEvent [i]);
-    Serial.print (") ");
+  if (touches > 0) { // If any touches are detected.
+    tsPanel.readData();
+    
+    for (uint8_t i = 0; i < touches; i++) {
+      Serial.print ("Touch ID: ");
+      Serial.print (i);
+      Serial.print (", X: ");
+      Serial.print (tsPanel.getPoint (i).x);
+      Serial.print (", Y: ");
+      Serial.print (tsPanel.getPoint (i).y);
+      Serial.print (", Z: ");
+      Serial.print (tsPanel.getPoint (i).z);
+      Serial.print (", State: ");
+      Serial.println (tsPanel.getPoint (i).state);
+    }
   }
-  Serial.println();
+  else {
+    Serial.println ("No touches detected");
+  }
 }
 
-//===================================================================================//
+//============================================================================================//
