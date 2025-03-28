@@ -6,17 +6,17 @@
   Framework: Arduino, PlatformIO
   Author: Vishnu Mohanan (@vishnumaiea, @vizmohanan)
   Maintainer: CIRCUITSTATE Electronics (@circuitstate)
-  Version: 0.0.2
+  Version: 0.0.3
   License: MIT
   Source: https://github.com/CIRCUITSTATE/CSE_FT6206
-  Last Modified: +05:30 00:00:00 AM 27-03-2025, Thursday
+  Last Modified: +05:30 08:55:08 AM 28-03-2025, Friday
  */
 //============================================================================================//
 
 #include "CSE_FT6206.h"
 
 //============================================================================================//
-/*!
+/**
   @brief  Instantiates a new FT6206 class.
 */
 CSE_FT6206:: CSE_FT6206 (uint16_t width, uint16_t height, TwoWire *i2c, int8_t pinRst, int8_t pinIrq) {
@@ -46,7 +46,7 @@ CSE_FT6206:: CSE_FT6206 (uint16_t width, uint16_t height, TwoWire *i2c, int8_t p
 }
 
 //============================================================================================//
-/*!
+/**
   @brief  Setups the I2C interface and hardware, identifies if chip is found.
 
   @returns True if an FT6206 is found, false on any failure.
@@ -173,7 +173,7 @@ uint16_t CSE_FT6206:: getHeight() {
 }
 
 //============================================================================================//
-/*!
+/**
   @brief  Sets the threshold for when a touch is detected.
 
   @param  threshold Optional threshhold-for-touch value, default is
@@ -181,18 +181,19 @@ uint16_t CSE_FT6206:: getHeight() {
   too/not sensitive.
 */
 bool CSE_FT6206:: setThreshold (uint8_t threshold) {
-  // change threshhold to be higher/lower
+  // Change threshold to be higher/lower.
   writeRegister8 (FT62XX_REG_TH_GROUP, threshold);
   return true;
 } 
 
 //============================================================================================//
-/*!
-  @brief  Determines if there are any touches detected.
+/**
+  @brief Returns the number of touches detected.
 
-  @returns Number of touches detected, can be 0, 1 or 2.
+  @returns Number of touches detected. Can be 0, 1 or 2.
 */
 uint8_t CSE_FT6206:: getTouches (void) {
+  // Read the number of active touches.
   uint8_t n = readRegister8 (FT62XX_REG_TD_STATUS);
 
   if (n > 2) {
@@ -209,14 +210,16 @@ uint8_t CSE_FT6206:: getTouches (void) {
  * @return `bool` True if touched, false if not.
  */
 bool CSE_FT6206:: isTouched (uint8_t id) {
-  readData();
-  
   // Check if the touch id is greater than supported.
   if (id >= FT6206_MAX_TOUCH_POINTS) {
     return false;
   }
-
-  if (touchPoints [id].state == 1) { // Check if the point is touched.
+  
+  readData();
+  
+  // Check if the point is touched.
+  // A contact means the screen is being actively touched.
+  if (touchPoints [id].state == FT62XX_TOUCH_CONTACT) { 
     return true;
   }
 
@@ -233,29 +236,25 @@ bool CSE_FT6206:: isTouched (void) {
 }
 
 //============================================================================================//
-/*!
-  @brief  Queries the chip and retrieves a point data.
+/**
+  @brief Get the touch point.
 
-  @param  n The # index (0 or 1) to the points we can detect. In theory we can
-  detect 2 points but we've found that you should only use this for
-  single-touch since the two points cant share the same half of the screen.
+  @param  n The index of the touch point. Can be 0 or 1. Default is 0.
 
-  @returns CSE_TouchPoint object that has the x and y coordinets set. If the
-  z coordinate is 0 it means the point is not touched. If z is 1, it is
-  currently touched.
+  @returns CSE_TouchPoint
 */
 CSE_TouchPoint CSE_FT6206:: getPoint (uint8_t n) {
-  readData();
-
+  // Check if the touch id is greater than supported.
   if (n >= FT6206_MAX_TOUCH_POINTS) {
-    return CSE_TouchPoint();
+    return CSE_TouchPoint(); // Return empty point
   }
-  
+
+  readData();
   return touchPoints [n];
 }
 
 //============================================================================================//
-/*!
+/**
   @brief  Reads the report rate or scan rate in the active mode. The default value
   is usually 6 Hz and max is 14 hz. You can modify this with setMonitorScanRate().
 
@@ -266,7 +265,7 @@ uint8_t CSE_FT6206:: getActiveScanRate() {
 }
 
 //============================================================================================//
-/*!
+/**
   @brief  Reads the report rate or scan rate in the monitor/sleeping mode. The default value
   is usually 40 Hz. You can modify this with setMonitorScanRate().
 
@@ -279,7 +278,7 @@ uint8_t CSE_FT6206:: getMonitorScanRate() {
 }
 
 //============================================================================================//
-/*!
+/**
   @brief  Sets the report rate or scan rate in the active mode.
 
   @param  rate The rate to set the active scan rate to. The default is 6 Hz.
@@ -292,7 +291,7 @@ bool CSE_FT6206:: setMonitorScanRate (uint8_t rate) {
 }
 
 //============================================================================================//
-/*!
+/**
   @brief  Sets the report rate or scan rate in the monitor/sleeping mode.
 
   @param  rate The rate to set the monitor scan rate to. The default is 6 Hz.
@@ -305,7 +304,7 @@ bool CSE_FT6206:: setActiveScanRate (uint8_t rate) {
 }
 
 //============================================================================================//
-/*!
+/**
   @brief  Reads the interrupt output mode. The default value is 0x1 (Trigger mode).
 
   @returns The interrupt mode; either 1 (trigger mode) or 0 (polling mode).
@@ -315,7 +314,7 @@ uint8_t CSE_FT6206:: getInterruptMode() {
 }
 
 //============================================================================================//
-/*!
+/**
   @brief  Sets the interrupt output mode. The default value is 0x1 (Trigger mode).
 
   @param  mode The interrupt mode; either 1 (trigger mode) or 0 (polling mode).
@@ -331,7 +330,7 @@ bool CSE_FT6206:: setInterruptMode (uint8_t mode) {
 }
 
 //============================================================================================//
-/*!
+/**
   @brief  Reads the current gesture ID.
 
   @returns The current gesture ID.
@@ -341,7 +340,7 @@ uint8_t CSE_FT6206:: getGestureID() {
 }
 
 //============================================================================================//
-/*!
+/**
   @brief  Reads the current gesture ID and returns a string with the gesture name.
 
   @returns The current gesture name.
@@ -368,14 +367,14 @@ String CSE_FT6206:: getGestureName() {
 }
 
 //============================================================================================//
-/*!
+/**
   @brief  Reads the touch-related data from the FT6206 and saves them to the
   class variables. The reading is done in one go.
 */
 void CSE_FT6206:: readData (void) {
-  uint8_t i2cdat [16];  // Hols the first 16 bytes of data from the FT6206
+  uint8_t i2cdat [16];  // Holds the first 16 bytes of data from the FT6206
 
-  // Send the register address to start reading data from
+  // Send the register address to start reading data from.
   wireInstance->beginTransmission (FT62XX_I2C_ADDR);
   wireInstance->write (byte (FT62XX_REG_DEV_MODE));
   wireInstance->endTransmission();
@@ -398,7 +397,7 @@ void CSE_FT6206:: readData (void) {
     }
   #endif
 
-  // Save the touch count
+  // Save the touch count.
   touches = i2cdat [FT62XX_REG_TD_STATUS];
 
   // The touch count can be 1-2 only as per the datasheet.
@@ -407,7 +406,7 @@ void CSE_FT6206:: readData (void) {
     touches = 0;
   }
 
-  // Save the gesture ID
+  // Save the gesture ID.
   gestureID = i2cdat [FT62XX_REG_GEST_ID];
 
   #ifdef CSE_FT6206_DEBUG
@@ -500,7 +499,7 @@ void CSE_FT6206:: readData (void) {
 }
 
 //============================================================================================//
-/*!
+/**
   @brief  Reads the 8-bits from the specified register.
 
   @param  reg The register to read from.
@@ -531,7 +530,7 @@ uint8_t CSE_FT6206:: readRegister8 (uint8_t reg) {
 }
 
 //============================================================================================//
-/*!
+/**
   @brief  Writes an 8 bit value to the specified register location.
 
   @param  reg The register to write to.

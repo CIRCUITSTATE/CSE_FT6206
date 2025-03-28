@@ -2,17 +2,17 @@
 //============================================================================================//
 /*
   Filename: Read-Touch-Interrupt.ino
-  Description: Example Arduino sketch from the CSE_CST328 Arduino library.
+  Description: Example Arduino sketch from the CSE_FT6206 Arduino library.
   Reads the touch sensor through interrupt method and prints the data to the serial monitor.
   This code was written for and tested with FireBeetle-ESP32E board.
   
   Framework: Arduino, PlatformIO
   Author: Vishnu Mohanan (@vishnumaiea, @vizmohanan)
   Maintainer: CIRCUITSTATE Electronics (@circuitstate)
-  Version: 0.1
+  Version: 0.0.3
   License: MIT
-  Source: https://github.com/CIRCUITSTATE/CSE_CST328
-  Last Modified: +05:30 00:12:15 AM 27-03-2025, Thursday
+  Source: https://github.com/CIRCUITSTATE/CSE_FT6206
+  Last Modified: +05:30 08:55:18 AM 28-03-2025, Friday
  */
 //============================================================================================//
 
@@ -50,8 +50,8 @@ void setup() {
   tsPanel.setMonitorScanRate (60);
 
   // Change the interrupt mode to trigger or polling and observe the difference.
-  tsPanel.setInterruptMode (FT62XX_INTERRUPT_TRIGGER);
-  // tsPanel.setInterruptMode (FT62XX_INTERRUPT_POLLING);
+  tsPanel.setInterruptMode (FT62XX_INTERRUPT_TRIGGER); // Continous triggering
+  // tsPanel.setInterruptMode (FT62XX_INTERRUPT_POLLING); // One trigger at a time
 
   // Either use internal pullup or external pullup. Line is active low.
   pinMode (FT6206_PIN_INT, INPUT_PULLUP);
@@ -74,26 +74,31 @@ void loop() {
 
 //============================================================================================//
 /**
- * @brief Reads a single touch point from the panel and print their info to the serial monitor.
+ * @brief Reads all touch points from the panel and print their info to the serial monitor.
  * 
  */
 void readTouch() {
-  uint8_t point = 0;
-  
-  if (tsPanel.isTouched (point)) {
-    Serial.print ("Touch ID: ");
-    Serial.print (point);
-    Serial.print (", X: ");
-    Serial.print (tsPanel.getPoint (point).x);
-    Serial.print (", Y: ");
-    Serial.print (tsPanel.getPoint (point).y);
-    Serial.print (", Z: ");
-    Serial.print (tsPanel.getPoint (point).z);
-    Serial.print (", State: ");
-    Serial.println (tsPanel.getPoint (point).state);
-  }
-  else {
-    Serial.println ("No touches detected");
+  // Read all touch data.
+  // tsPanel.readData();
+
+  // Print the touch point data.
+  for (uint8_t i = 0; i < 2; i++) {
+    if (tsPanel.isTouched (i)) {
+      Serial.print ("ID: ");
+      Serial.print (i);
+      Serial.print (", X: ");
+      Serial.print (tsPanel.getPoint (i).x);
+      Serial.print (", Y: ");
+      Serial.print (tsPanel.getPoint (i).y);
+      Serial.print (", Z: ");
+      Serial.print (tsPanel.getPoint (i).z);
+      Serial.print (", State: ");
+      Serial.print (tsPanel.getPoint (i).state);
+      if (tsPanel.getPoint (i).state == 0) Serial.println (" (Press Down)");
+      else if (tsPanel.getPoint (i).state == 1) Serial.println (" (Lift Up)");
+      else if (tsPanel.getPoint (i).state == 2) Serial.println (" (Contact)");
+      else if (tsPanel.getPoint (i).state == 3) Serial.println (" (No Event)");
+    }
   }
 }
 

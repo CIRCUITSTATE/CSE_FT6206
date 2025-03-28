@@ -6,10 +6,10 @@
   Framework: Arduino, PlatformIO
   Author: Vishnu Mohanan (@vishnumaiea, @vizmohanan)
   Maintainer: CIRCUITSTATE Electronics (@circuitstate)
-  Version: 0.0.2
+  Version: 0.0.3
   License: MIT
   Source: https://github.com/CIRCUITSTATE/CSE_FT6206
-  Last Modified: +05:30 23:36:24 PM 26-03-2025, Wednesday
+  Last Modified: +05:30 08:55:04 AM 28-03-2025, Friday
  */
 //============================================================================================//
 
@@ -84,6 +84,12 @@
 #define FT62XX_GESTURE_ZOOM_IN            0x48  // Gesture: Zoom In
 #define FT62XX_GESTURE_ZOOM_OUT           0x49  // Gesture: Zoom Out
 
+// FT6206 Touch Events
+#define FT62XX_TOUCH_DOWN                 0x00  // Touch Event: Press Down
+#define FT62XX_TOUCH_UP                   0x01  // Touch Event: Lift Up
+#define FT62XX_TOUCH_CONTACT              0x02  // Touch Event: Contact
+#define FT62XX_TOUCH_NONE                 0x03  // Touch Event: No event
+
 #define FT62XX_INTERRUPT_POLLING          0x00  // Polling mode
 #define FT62XX_INTERRUPT_TRIGGER          0x01  // Trigger mode
 
@@ -116,7 +122,12 @@ class CSE_FT6206 {
 
     CSE_FT6206 (uint16_t width, uint16_t height, TwoWire *i2c = &Wire, int8_t pinRst = -1, int8_t pinIrq = -1);
 
+    // Initialization functions.
+    
     bool begin();
+
+    // Configuration functions.
+
     bool setThreshold (uint8_t threshold = FT62XX_DEFAULT_THRESHOLD);
     uint8_t getActiveScanRate (void);
     uint8_t getMonitorScanRate (void);
@@ -124,17 +135,25 @@ class CSE_FT6206 {
     bool setActiveScanRate (uint8_t rate = 6);
     uint8_t getInterruptMode (void);
     bool setInterruptMode (uint8_t mode = 1);
-    uint8_t getGestureID (void);
-    String getGestureName (void);
+
+    // Data functions.
+
     void readData (void);
-    uint8_t getTouches (void);  // Returns the number of touches detected
     bool isTouched (void); // Returns true if there are any touches detected
     bool isTouched (uint8_t id); // Returns true if there are any touches detected
     CSE_TouchPoint getPoint (uint8_t n = 0);  // By default, P1 touch point is returned
+    uint8_t getTouches (void);  // Returns the number of touches detected
+    uint8_t getGestureID (void);
+    String getGestureName (void);
+    
+    // Utility functions.
+
     uint8_t setRotation (uint8_t r = 0);  // Set the rotation of the touch panel (0-3
     uint8_t getRotation();  // Set the rotation of the touch panel (0-3
     uint16_t getWidth();
     uint16_t getHeight();
+
+    // Data transfer functions.
 
     void writeRegister8 (uint8_t reg, uint8_t val); // Write an 8 bit value to a register
     uint8_t readRegister8 (uint8_t reg);  // Read an 8 bit value from a register
