@@ -9,7 +9,7 @@
   Version: 0.0.3
   License: MIT
   Source: https://github.com/CIRCUITSTATE/CSE_FT6206
-  Last Modified: +05:30 20:33:30 PM 28-03-2025, Friday
+  Last Modified: +05:30 21:09:56 PM 28-03-2025, Friday
  */
 //============================================================================================//
 
@@ -215,7 +215,8 @@ bool CSE_FT6206:: isTouched (uint8_t id) {
     return false;
   }
   
-  fastReadData (id);
+  // fastReadData (id);
+  readData();
   
   // Check if the point is touched.
   // A contact means the screen is being actively touched.
@@ -250,7 +251,8 @@ CSE_TouchPoint CSE_FT6206:: getPoint (uint8_t n) {
     return CSE_TouchPoint(); // Return empty point
   }
 
-  fastReadData (n);
+  // fastReadData (n);
+  readData();
   return touchPoints [n];
 }
 
@@ -503,6 +505,10 @@ void CSE_FT6206:: fastReadData (uint8_t id) {
   }
   
   uint8_t i2cdat [6];
+
+  uint8_t data = readRegister8 (FT62XX_REG_DEV_MODE);
+  data = readRegister8 (FT62XX_REG_DEV_MODE + 1);
+  data = readRegister8 (FT62XX_REG_DEV_MODE + 2);
 
   // Send the register address to start reading data from.
   wireInstance->beginTransmission (FT62XX_I2C_ADDR);

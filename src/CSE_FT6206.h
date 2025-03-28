@@ -9,7 +9,7 @@
   Version: 0.0.3
   License: MIT
   Source: https://github.com/CIRCUITSTATE/CSE_FT6206
-  Last Modified: +05:30 21:00:20 PM 28-03-2025, Friday
+  Last Modified: +05:30 21:08:09 PM 28-03-2025, Friday
  */
 //============================================================================================//
 

@@ -3,6 +3,12 @@
 
 
 #
+### **+05:30 09:10:03 PM 28-03-2025, Friday**
+
+  - Seems like the `fastReadData()` function has issues.
+  - Instances of `fastReadData()` are now replaced with `readData()`.
+
+#
 ### **+05:30 09:00:52 PM 28-03-2025, Friday**
 
   - Now uses `fastReadData()` everywhere to read single touch points.

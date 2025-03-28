@@ -10,7 +10,7 @@
   Version: 0.0.3
   License: MIT
   Source: https://github.com/CIRCUITSTATE/CSE_CST328
-  Last Modified: +05:30 20:33:14 PM 28-03-2025, Friday
+  Last Modified: +05:30 21:06:59 PM 28-03-2025, Friday
  */
 //============================================================================================//
 
@@ -77,8 +77,7 @@ void loop() {
  */
 void readTouch() {
   // Read all touch data.
-  // tsPanel.readData();
-
+  tsPanel.readData();
   // tsPanel.fastReadData (0);
 
   // Print the touch point data.
