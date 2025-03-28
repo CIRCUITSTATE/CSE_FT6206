@@ -9,7 +9,7 @@
   Version: 0.0.3
   License: MIT
   Source: https://github.com/CIRCUITSTATE/CSE_FT6206
-  Last Modified: +05:30 19:32:25 PM 28-03-2025, Friday
+  Last Modified: +05:30 20:33:30 PM 28-03-2025, Friday
  */
 //============================================================================================//
 
@@ -215,7 +215,7 @@ bool CSE_FT6206:: isTouched (uint8_t id) {
     return false;
   }
   
-  readData();
+  fastReadData (id);
   
   // Check if the point is touched.
   // A contact means the screen is being actively touched.
@@ -232,7 +232,8 @@ bool CSE_FT6206:: isTouched (uint8_t id) {
  * @returns  True if touched, false if not.
  */
 bool CSE_FT6206:: isTouched (void) {
-  return (getTouches() > 0);
+  // return (getTouches() > 0);
+  return (readRegister8 (FT62XX_REG_TD_STATUS) > 0);
 }
 
 //============================================================================================//
@@ -249,7 +250,7 @@ CSE_TouchPoint CSE_FT6206:: getPoint (uint8_t n) {
     return CSE_TouchPoint(); // Return empty point
   }
 
-  readData();
+  fastReadData (n);
   return touchPoints [n];
 }
 
@@ -425,18 +426,23 @@ void CSE_FT6206:: readData (void) {
   // is because the next identical set of registers is 6 bytes away.
   for (uint8_t id = 0; id < FT6206_MAX_TOUCH_POINTS; id++) {
     // Save the touch point data.
+    uint16_t tempData = 0;
+
     touchPoints [id].state = i2cdat [FT62XX_REG_P1_XH + (id * 6)] >> 6;  // Shifting right by 6 gives us the 2 MSB bits [7:6]
     touchPoints [id].id = i2cdat [FT62XX_REG_P1_YH + (id * 6)] >> 4; // Only 4 bits are valid [7:4]
 
-    touchPoints [id].x = i2cdat [FT62XX_REG_P1_XH + (id * 6)] & 0x0F;  // Only the last 4 bits are the X coordinate [11:8]
-    touchPoints [id].x <<= 8; // Shift the MSBs to place
-    touchPoints [id].x |= i2cdat [FT62XX_REG_P1_XL + (id * 6)];  // Now add the LSBs [7:0]
+    tempData = i2cdat [FT62XX_REG_P1_XH + (id * 6)] & 0x000F;  // Only the last 4 bits are the X coordinate [11:8]
+    tempData <<= 8; // Shift the MSBs to place
+    tempData |= i2cdat [FT62XX_REG_P1_XL + (id * 6)];  // Now add the LSBs [7:0]
+    touchPoints [id].x = int16_t (tempData);
 
-    touchPoints [id].y = i2cdat [FT62XX_REG_P1_YH + (id * 6)] & 0x0F;  // Only the last 4 bits are the Y coordinate [11:8]
-    touchPoints [id].y <<= 8; // Shift the MSBs to place
-    touchPoints [id].y |= i2cdat [FT62XX_REG_P1_YL + (id * 6)];  // Now add the LSBs [7:0]
+    tempData = i2cdat [FT62XX_REG_P1_YH + (id * 6)] & 0x000F;  // Only the last 4 bits are the Y coordinate [11:8]
+    tempData <<= 8; // Shift the MSBs to place
+    tempData |= i2cdat [FT62XX_REG_P1_YL + (id * 6)];  // Now add the LSBs [7:0]
+    touchPoints [id].y = int16_t (tempData);
     
-    touchPoints [id].z = i2cdat [FT62XX_REG_P1_WEIGHT + (id * 6)];  // 8 bits of weight [7:0]
+    tempData = i2cdat [FT62XX_REG_P1_WEIGHT + (id * 6)];  // 8 bits of weight [7:0]
+    touchPoints [id].z = int16_t (tempData);
 
     touchArea [id] = i2cdat [FT62XX_REG_P1_MISC + (id * 6)] >> 4; // Only 4 bits are valid [7:4]
   }
@@ -504,7 +510,7 @@ void CSE_FT6206:: fastReadData (uint8_t id) {
   wireInstance->endTransmission();
   wireInstance->requestFrom (byte (FT62XX_I2C_ADDR), byte (6));
 
-  // Read the first 16 bytes of data which have the information about the touches.
+  // Read the first 6 bytes of data which have the information about the touches.
   for (uint8_t i = 0; i < 6; i++) {
     if (wireInstance->available()) {
       i2cdat [i] = wireInstance->read();
@@ -512,18 +518,23 @@ void CSE_FT6206:: fastReadData (uint8_t id) {
   }
 
   // Save the touch point data.
+  uint16_t tempData = 0;
+
   touchPoints [id].state = i2cdat [FT62XX_REG_P1_XH + (id * 6)] >> 6;  // Shifting right by 6 gives us the 2 MSB bits [7:6]
   touchPoints [id].id = i2cdat [FT62XX_REG_P1_YH + (id * 6)] >> 4; // Only 4 bits are valid [7:4]
 
-  touchPoints [id].x = i2cdat [FT62XX_REG_P1_XH + (id * 6)] & 0x0F;  // Only the last 4 bits are the X coordinate [11:8]
-  touchPoints [id].x <<= 8; // Shift the MSBs to place
-  touchPoints [id].x |= i2cdat [FT62XX_REG_P1_XL + (id * 6)];  // Now add the LSBs [7:0]
+  tempData = i2cdat [FT62XX_REG_P1_XH + (id * 6)] & 0x000F;  // Only the last 4 bits are the X coordinate [11:8]
+  tempData <<= 8; // Shift the MSBs to place
+  tempData |= i2cdat [FT62XX_REG_P1_XL + (id * 6)];  // Now add the LSBs [7:0]
+  touchPoints [id].x = int16_t (tempData);
 
-  touchPoints [id].y = i2cdat [FT62XX_REG_P1_YH + (id * 6)] & 0x0F;  // Only the last 4 bits are the Y coordinate [11:8]
-  touchPoints [id].y <<= 8; // Shift the MSBs to place
-  touchPoints [id].y |= i2cdat [FT62XX_REG_P1_YL + (id * 6)];  // Now add the LSBs [7:0]
+  tempData = i2cdat [FT62XX_REG_P1_YH + (id * 6)] & 0x000F;  // Only the last 4 bits are the Y coordinate [11:8]
+  tempData <<= 8; // Shift the MSBs to place
+  tempData |= i2cdat [FT62XX_REG_P1_YL + (id * 6)];  // Now add the LSBs [7:0]
+  touchPoints [id].y = int16_t (tempData);
   
-  touchPoints [id].z = i2cdat [FT62XX_REG_P1_WEIGHT + (id * 6)];  // 8 bits of weight [7:0]
+  tempData = i2cdat [FT62XX_REG_P1_WEIGHT + (id * 6)];  // 8 bits of weight [7:0]
+  touchPoints [id].z = int16_t (tempData);
 
   touchArea [id] = i2cdat [FT62XX_REG_P1_MISC + (id * 6)] >> 4; // Only 4 bits are valid [7:4]
 

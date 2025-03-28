@@ -10,7 +10,7 @@
   Version: 0.0.3
   License: MIT
   Source: https://github.com/CIRCUITSTATE/CSE_CST328
-  Last Modified: +05:30 19:34:39 PM 28-03-2025, Friday
+  Last Modified: +05:30 20:33:14 PM 28-03-2025, Friday
  */
 //============================================================================================//
 
@@ -79,23 +79,26 @@ void readTouch() {
   // Read all touch data.
   // tsPanel.readData();
 
+  // tsPanel.fastReadData (0);
+
   // Print the touch point data.
-  for (uint8_t i = 0; i < 2; i++) {
+  for (uint8_t i = 0; i < 1; i++) {
     if (1) {
+      CSE_TouchPoint point = tsPanel.getPoint (i);
       Serial.print ("ID: ");
-      Serial.print (i);
+      Serial.print (point.id);
       Serial.print (", X: ");
-      Serial.print (tsPanel.getPoint (i).x);
+      Serial.print (point.x);
       Serial.print (", Y: ");
-      Serial.print (tsPanel.getPoint (i).y);
+      Serial.print (point.y);
       Serial.print (", Z: ");
-      Serial.print (tsPanel.getPoint (i).z);
+      Serial.print (point.z);
       Serial.print (", State: ");
-      Serial.print (tsPanel.getPoint (i).state);
-      if (tsPanel.getPoint (i).state == 0) Serial.println (" (Press Down)");
-      else if (tsPanel.getPoint (i).state == 1) Serial.println (" (Lift Up)");
-      else if (tsPanel.getPoint (i).state == 2) Serial.println (" (Contact)");
-      else if (tsPanel.getPoint (i).state == 3) Serial.println (" (No Event)");
+      Serial.print (point.state);
+      if (point.state == 0) Serial.println (" (Press Down)");
+      else if (point.state == 1) Serial.println (" (Lift Up)");
+      else if (point.state == 2) Serial.println (" (Contact)");
+      else if (point.state == 3) Serial.println (" (No Event)");
     }
   }
 }

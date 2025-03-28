@@ -3,6 +3,13 @@
 
 
 #
+### **+05:30 09:00:52 PM 28-03-2025, Friday**
+
+  - Now uses `fastReadData()` everywhere to read single touch points.
+  - Uses `tempData` to convert the touch data to the CSE_TouchPoint data type.
+  - Due to a bug, the returned touch data is garbage.
+
+#
 ### **+05:30 07:34:53 PM 28-03-2025, Friday**
 
   - Removed all redundant touch point data variables.
