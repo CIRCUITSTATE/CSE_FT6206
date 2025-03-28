@@ -10,7 +10,7 @@
   Version: 0.0.3
   License: MIT
   Source: https://github.com/CIRCUITSTATE/CSE_CST328
-  Last Modified: +05:30 08:55:11 AM 28-03-2025, Friday
+  Last Modified: +05:30 19:34:39 PM 28-03-2025, Friday
  */
 //============================================================================================//
 
@@ -36,7 +36,7 @@ void setup() {
   delay (100);
 
   Serial.println();
-  Serial.println ("== CSE_FT6206: Read-Touch-Interrupt ==");
+  Serial.println ("== CSE_FT6206: Test ==");
 
   // // Initialize the I2C interface (for ESP32).
   // Wire.begin (FT6206_PIN_SDA, FT6206_PIN_SCL);

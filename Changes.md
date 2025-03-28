@@ -3,6 +3,12 @@
 
 
 #
+### **+05:30 07:34:53 PM 28-03-2025, Friday**
+
+  - Removed all redundant touch point data variables.
+  - Added `fastReadData()` that will only read the specified touch point.
+
+#
 ### **+05:30 08:48:14 AM 28-03-2025, Friday**
 
   - Updated the examples.

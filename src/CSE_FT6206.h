@@ -9,7 +9,7 @@
   Version: 0.0.3
   License: MIT
   Source: https://github.com/CIRCUITSTATE/CSE_FT6206
-  Last Modified: +05:30 08:55:04 AM 28-03-2025, Friday
+  Last Modified: +05:30 19:33:20 PM 28-03-2025, Friday
  */
 //============================================================================================//
 
@@ -111,11 +111,7 @@ class CSE_FT6206 {
 
     // FT6206 can detect two touch points, P1 and P2 at the same time.
     // So have two sets of values for each point.
-    uint8_t touchEvent [FT6206_MAX_TOUCH_POINTS];  // The type of touch
-    uint16_t touchX [FT6206_MAX_TOUCH_POINTS], touchY [FT6206_MAX_TOUCH_POINTS];
-    uint16_t touchID [FT6206_MAX_TOUCH_POINTS];
     uint8_t touchArea [FT6206_MAX_TOUCH_POINTS];
-    uint8_t touchWeight [FT6206_MAX_TOUCH_POINTS];
     uint8_t rotation;
 
     CSE_TouchPoint touchPoints [FT6206_MAX_TOUCH_POINTS];
@@ -139,6 +135,7 @@ class CSE_FT6206 {
     // Data functions.
 
     void readData (void);
+    void fastReadData (uint8_t id = 0);
     bool isTouched (void); // Returns true if there are any touches detected
     bool isTouched (uint8_t id); // Returns true if there are any touches detected
     CSE_TouchPoint getPoint (uint8_t n = 0);  // By default, P1 touch point is returned
