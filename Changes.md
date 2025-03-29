@@ -3,6 +3,11 @@
 
 
 #
+### **+05:30 08:03:26 PM 29-03-2025, Saturday**
+
+  - `readData()` now reads 15 bytes instead of 16.
+
+#
 ### **+05:30 09:10:03 PM 28-03-2025, Friday**
 
   - Seems like the `fastReadData()` function has issues.

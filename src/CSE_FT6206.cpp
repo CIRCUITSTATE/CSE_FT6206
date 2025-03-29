@@ -9,7 +9,7 @@
   Version: 0.0.3
   License: MIT
   Source: https://github.com/CIRCUITSTATE/CSE_FT6206
-  Last Modified: +05:30 21:09:56 PM 28-03-2025, Friday
+  Last Modified: +05:30 11:31:00 AM 29-03-2025, Saturday
  */
 //============================================================================================//
 
@@ -375,16 +375,16 @@ String CSE_FT6206:: getGestureName() {
   class variables. The reading is done in one go.
 */
 void CSE_FT6206:: readData (void) {
-  uint8_t i2cdat [16];  // Holds the first 16 bytes of data from the FT6206
+  uint8_t i2cdat [15];  // Holds the first 16 bytes of data from the FT6206
 
   // Send the register address to start reading data from.
   wireInstance->beginTransmission (FT62XX_I2C_ADDR);
   wireInstance->write (byte (FT62XX_REG_DEV_MODE));
   wireInstance->endTransmission();
-  wireInstance->requestFrom (byte (FT62XX_I2C_ADDR), byte (16));
+  wireInstance->requestFrom (byte (FT62XX_I2C_ADDR), byte (15));
 
   // Read the first 16 bytes of data which have the information about the touches.
-  for (uint8_t i = 0; i < 16; i++) {
+  for (uint8_t i = 0; i < 15; i++) {
     if (wireInstance->available()) {
       i2cdat [i] = wireInstance->read();
     }
@@ -506,9 +506,9 @@ void CSE_FT6206:: fastReadData (uint8_t id) {
   
   uint8_t i2cdat [6];
 
-  uint8_t data = readRegister8 (FT62XX_REG_DEV_MODE);
-  data = readRegister8 (FT62XX_REG_DEV_MODE + 1);
-  data = readRegister8 (FT62XX_REG_DEV_MODE + 2);
+  // uint8_t data = readRegister8 (FT62XX_REG_DEV_MODE);
+  // data = readRegister8 (FT62XX_REG_DEV_MODE + 1);
+  // data = readRegister8 (FT62XX_REG_DEV_MODE + 2);
 
   // Send the register address to start reading data from.
   wireInstance->beginTransmission (FT62XX_I2C_ADDR);
